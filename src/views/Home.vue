@@ -1,9 +1,6 @@
 <template>
   <div class="home">
     <div class="banner">小车牌邮寄</div>
-    <!-- <div class="infoTitle">
-      蒙A小车牌资费标准如下：（仅限一副）
-    </div> -->
     <div>
       <a-descriptions title="蒙A小车牌资费标准如下：（仅限一副）" :column="1">
         <a-descriptions-item label="呼和浩特市内">
@@ -23,8 +20,8 @@
     </div>
     <a-form
       :form="form"
-      :label-col="{ span: 4 }"
-      :wrapper-col="{ span: 16 }"
+      :label-col="formItemLayout.labelCol"
+      :wrapper-col="formItemLayout.wrapperCol"
       @submit="handleSubmit"
     >
       <a-form-item label="选择类型">
@@ -104,12 +101,12 @@
           </a-select>
         </a-input>
       </a-form-item>
-      <a-form-item :wrapper-col="{ span: 16, offset: 4 }">
+      <a-form-item :wrapper-col="formItemLayoutWithOutLabel.wrapperCol">
         <a-button type="dashed" block>
           开始填写地址
         </a-button>
       </a-form-item>
-      <a-form-item :wrapper-col="{ span: 16, offset: 4 }">
+      <a-form-item :wrapper-col="formItemLayoutWithOutLabel.wrapperCol">
         <a-button type="primary" html-type="submit" block>
           立即支付
         </a-button>
@@ -127,7 +124,23 @@ export default {
   data() {
     return {
       formLayout: "horizontal",
-      form: this.$form.createForm(this, { name: "coordinated" })
+      form: this.$form.createForm(this, { name: "coordinated" }),
+      formItemLayout: {
+        labelCol: {
+          xs: { span: 24 },
+          sm: { span: 4 }
+        },
+        wrapperCol: {
+          xs: { span: 24 },
+          sm: { span: 16 }
+        }
+      },
+      formItemLayoutWithOutLabel: {
+        wrapperCol: {
+          xs: { span: 24, offset: 0 },
+          sm: { span: 16, offset: 4 }
+        }
+      }
     };
   },
   methods: {
@@ -196,9 +209,9 @@ export default {
 .home .ant-form {
   padding: 20px;
 }
-@media (max-width: 575px) {
+/* @media (max-width: 575px) {
   .ant-form-item-label {
     line-height: 2.5;
   }
-}
+} */
 </style>
