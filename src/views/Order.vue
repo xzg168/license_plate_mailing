@@ -30,30 +30,31 @@
         }"
       >
         <a-spin v-if="loadingMore" />
-        <a-button v-else @click="onLoadMore">
-          loading more
-        </a-button>
+        <a-button v-else @click="onLoadMore">loading more</a-button>
       </div>
       <a-list-item slot="renderItem" slot-scope="item">
-        <a-list-item-meta description="">
-          <a slot="title">订单编号：{{ item.title }}</a>
+        <a-list-item-meta description>
+          <a slot="title">订单编号：{{ item.orderNum }}</a>
         </a-list-item-meta>
         <div>
           <p>
-            <img src="@/assets/img/car.png" alt="" class="carImg" />
-            <span>蒙J 66666</span>
+            <img src="@/assets/img/car.png" alt class="carImg" />
+            <span>{{ item.businessName }}</span>
           </p>
-          <p class="status">已发货</p>
-          <p class="status">付款金额：20元</p>
-          <p>订单时间：<span>2020-9-11 14:12:30</span></p>
-          <p>邮递单号：<span>123456789</span></p>
+          <p class="status">{{ formatterStatus(item.businessStatus) }}</p>
+          <p class="status">付款金额：{{ item.orderAmount }}元</p>
+          <p>
+            订单时间：
+            <span>{{ item.createTime }}</span>
+          </p>
+          <p>
+            邮递单号：
+            <span>{{ item.trackingNumber }}</span>
+          </p>
         </div>
-        <div
-          slot="actions"
-          :style="{
+        <div slot="actions" :style="{
             textAlign: 'right'
-          }"
-        >
+          }">
           <a-button>查看物流</a-button>
         </div>
       </a-list-item>
@@ -62,6 +63,7 @@
 </template>
 
 <script>
+import axios from "axios";
 //这里可以导入其他文件（比如：组件，工具js，第三方插件js，json文件，图片文件等等）
 //例如：import 《组件名称》 from '《组件路径》';
 // const fakeDataUrl =
@@ -104,28 +106,26 @@ export default {
   watch: {},
   //方法集合
   methods: {
-    // getData(callback) {
-    //   let token = window.localStorage.getItem("token");
-    //   axios
-    //     .get(fakeDataUrl, {
-    //       headers: {
-    //         Authorization: "Bearer " + token
-    //       }
-    //     })
-    //     .then(res => {
-    //       //alert("info返回的数据："+res.data);
-    //       if (res.data.code == 401) {
-    //         window.localStorage.removeItem("token");
-    //         //   this.gotoWxOauth();
-    //       }
-    //       callback(res);
-    //       console.log(res);
-    //     })
-    //     .catch(err => {
-    //       console.log(err);
-    //       alert("/wx/info请求出错！");
-    //     });
-    // },
+    getData(callback) {
+      //let token = window.localStorage.getItem("token");
+      //http://localhost:7500/wxNotify/orderList
+      // const fakeDataUrl = "http://localhost:7500";
+      axios
+        .get("/wxNotify/orderList")
+        .then(res => {
+          //alert("info返回的数据："+res.data);
+          if (res.data.code == 401) {
+            window.localStorage.removeItem("token");
+            //   this.gotoWxOauth();
+          }
+          callback(res);
+          console.log(res);
+        })
+        .catch(err => {
+          console.log(err);
+          alert("getData请求出错！");
+        });
+    },
     onLoadMore() {
       //   this.loadingMore = true;
       //   this.getData(res => {
@@ -135,6 +135,16 @@ export default {
       //       window.dispatchEvent(new Event('resize'));
       //     });
       //   });
+    },
+
+    formatterStatus(status) {
+      if (status === "1") {
+        return "待发货";
+      }
+
+      if (status === "2") {
+        return "已发货";
+      }
     }
   },
   //生命周期 - 创建完成（可以访问当前this实例）
@@ -142,10 +152,10 @@ export default {
   //生命周期 - 挂载完成（可以访问DOM元素）
   mounted() {
     this.loading = false;
-    // this.getData(res => {
-    //   this.loading = false;
-    //   this.data = res.results;
-    // });
+    this.getData(res => {
+      this.loading = false;
+      this.data = res.data.data;
+    });
   },
   beforeCreate() {}, //生命周期 - 创建之前
   beforeMount() {}, //生命周期 - 挂载之前
