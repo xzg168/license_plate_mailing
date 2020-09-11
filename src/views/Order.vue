@@ -30,9 +30,9 @@
         }"
       >
         <a-spin v-if="loadingMore" />
-        <a-button v-else @click="onLoadMore">loading more</a-button>
+        <a-button v-else @click="onLoadMore">加载更多</a-button>
       </div>
-      <a-list-item slot="renderItem" slot-scope="item">
+      <a-list-item slot="renderItem" slot-scope="item" :key="item.id">
         <a-list-item-meta description>
           <a slot="title">订单编号：{{ item.orderNum }}</a>
         </a-list-item-meta>
@@ -52,10 +52,13 @@
             <span>{{ item.trackingNumber }}</span>
           </p>
         </div>
-        <div slot="actions" :style="{
+        <div
+          slot="actions"
+          :style="{
             textAlign: 'right'
-          }">
-          <a-button>查看物流</a-button>
+          }"
+        >
+          <a-button @click="viewWl(item.id)">查看物流</a-button>
         </div>
       </a-list-item>
     </a-list>
@@ -66,38 +69,18 @@
 import axios from "axios";
 //这里可以导入其他文件（比如：组件，工具js，第三方插件js，json文件，图片文件等等）
 //例如：import 《组件名称》 from '《组件路径》';
-// const fakeDataUrl =
-//   "https://randomuser.me/api/?results=5&inc=name,gender,email,nat&noinfo";
-// import axios from "axios";
 export default {
   //import引入的组件需要注入到对象中才能使用
   components: {},
   data() {
     //这里存放数据
     return {
+      pageNum: 1,
+      pageSize: 1,
       loading: true,
       loadingMore: false,
       showLoadingMore: true,
-      data: [
-        {
-          title: "Title 1"
-        },
-        {
-          title: "Title 2"
-        },
-        {
-          title: "Title 3"
-        },
-        {
-          title: "Title 4"
-        },
-        {
-          title: "Title 5"
-        },
-        {
-          title: "Title 6"
-        }
-      ]
+      data: []
     };
   },
   //监听属性 类似于data概念
@@ -111,7 +94,9 @@ export default {
       //http://localhost:7500/wxNotify/orderList
       // const fakeDataUrl = "http://localhost:7500";
       axios
-        .get("/wxNotify/orderList")
+        .get("/wxNotify/orderList", {
+          params: { pageNum: this.pageNum, pageSize: this.pageSize }
+        })
         .then(res => {
           //alert("info返回的数据："+res.data);
           if (res.data.code == 401) {
@@ -127,16 +112,24 @@ export default {
         });
     },
     onLoadMore() {
-      //   this.loadingMore = true;
-      //   this.getData(res => {
-      //     this.data = this.data.concat(res.results);
-      //     this.loadingMore = false;
-      //     this.$nextTick(() => {
-      //       window.dispatchEvent(new Event('resize'));
-      //     });
-      //   });
+      this.loadingMore = true;
+      this.pageNum++;
+      this.getData(res => {
+        this.data = this.data.concat(res.data.rows);
+        this.loadingMore = false;
+        if (this.pageNum < res.data.pages) {
+          this.showLoadingMore = true;
+        } else {
+          this.showLoadingMore = false;
+        }
+        this.$nextTick(() => {
+          window.dispatchEvent(new Event("resize"));
+        });
+      });
     },
-
+    viewWl(id) {
+      console.log(id);
+    },
     formatterStatus(status) {
       if (status === "1") {
         return "待发货";
@@ -151,10 +144,14 @@ export default {
   created() {},
   //生命周期 - 挂载完成（可以访问DOM元素）
   mounted() {
-    this.loading = false;
     this.getData(res => {
       this.loading = false;
-      this.data = res.data.data;
+      this.data = res.data.rows;
+      if (this.pageNum < res.data.pages) {
+        this.showLoadingMore = true;
+      } else {
+        this.showLoadingMore = false;
+      }
     });
   },
   beforeCreate() {}, //生命周期 - 创建之前

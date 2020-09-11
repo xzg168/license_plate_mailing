@@ -10,7 +10,8 @@ import {
   Select,
   List,
   Avatar,
-  Descriptions
+  Descriptions,
+  Spin
 } from "ant-design-vue";
 import App from "./App.vue";
 import router from "./router";
@@ -27,6 +28,7 @@ Vue.use(Row);
 Vue.use(Col);
 Vue.use(List);
 Vue.use(Avatar);
+Vue.use(Spin);
 Vue.prototype.$message = message;
 new Vue({
   router,
